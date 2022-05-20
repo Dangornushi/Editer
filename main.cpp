@@ -11,7 +11,7 @@ void MainWindow::MainInit(void) {
 
 void MainWindow::Main(void) {
     struct winsize ws;
-    int inputData;
+    int inputData = 0;
 
     if (~ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws)) {
         editWindow->w = ws.ws_col;
@@ -33,7 +33,6 @@ void MainWindow::Main(void) {
     }
 
     if (inputData == '\n') {
-        cX = 0;
         switch (mode) {
             case 0: {
                         //cursXを正しい値にする（global変数使う）
@@ -45,6 +44,7 @@ void MainWindow::Main(void) {
             case 1: {
                         fileData.resize(size(fileData)+1);
                         cY++;
+                        cX = 0;
                         break;
                     }
         }
@@ -52,10 +52,10 @@ void MainWindow::Main(void) {
     // Backspace
     else if (inputData == 127) {
         if (cX > 0) {
-            cX--;
             if (mode==1) {
-                fileData[cY].resize(cX);
+                fileData[cY][cX-1] = ' ';
             }
+            cX--;
         }
     }
     else if (inputData == 27) {
@@ -69,7 +69,16 @@ void MainWindow::Main(void) {
                         switch (inputData) {
                             // h
                             case 104: {
-                                          cX--;
+                                          if (cX > 0) cX--;
+                                          else {
+                                              cY--;
+                                              cX = fileData[cY].length();
+                                          }
+                                          break;
+                                      }
+                            // i
+                            case 105: {
+                                          mode = 1;
                                           break;
                                       }
                             // j
@@ -84,7 +93,9 @@ void MainWindow::Main(void) {
                                       }
                             // l
                             case 108: {
-                                          cX++;
+                                          if (cX < fileData[cY].length()) {
+                                              cX++;
+                                          }
                                           break;
                                       }
                             default: {
@@ -98,7 +109,7 @@ void MainWindow::Main(void) {
                     }
             // insert
             case 1: {
-                        //fileData[cY].resize(cX);
+                        fileData[cY].resize(cX);
                         fileData[cY].push_back(inputData);
                         cX++;
                         break;
@@ -109,9 +120,34 @@ void MainWindow::Main(void) {
     Main();
 }
 
-int main(void) {
+int main(int argc, char*argv[]) {
     MainWindow mw;
     MainWindow *mainWindow = &mw;
+
+    if (argc > 1) {
+        std::string line;
+        lineNum = 0;
+        openFileName = argv[1];
+        std::ifstream input_file(openFileName, std::ios::in);
+        if (!input_file) {
+            std::cout << "Could not open the file -> '" << openFileName <<  "'" << std::endl;
+            return 0;
+        }
+        else {
+            while (getline(input_file, line)) {
+                fileData.push_back(line);
+                lineNum++;
+            }
+            if (lineNum == 0) {
+                lineNum++;
+                fileData.push_back("\n");
+            }
+            lineNum--;
+            cY = 0;
+            cX = 0;
+            input_file.close();
+        }
+    }
 
     cY = 1;
     cX = 0;

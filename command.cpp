@@ -16,9 +16,6 @@ std::string Command::runCommand(void) {
         output_file.close();
 
     }
-    if (inputCommand == "i") {
-        mode = 1;
-    }
     if (inputCommand[0] == 'o') {
         lineNum = 0;
         inputCommand.erase(0, 2);
@@ -33,9 +30,13 @@ std::string Command::runCommand(void) {
                 fileData.push_back(line);
                 lineNum++;
             }
+            if (lineNum == 0) {
+                lineNum++;
+                fileData.push_back("\n");
+            }
             lineNum--;
             cY = 0;
-            cX = 0;
+            cX = fileData[cY].length();
             input_file.close();
         }
 

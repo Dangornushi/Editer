@@ -9,10 +9,30 @@ void EditWindow::drawDataLine() {
     // ファイルの内容
     for (auto data : fileData) {
         if (cY == i) {
-                printf("\x1b[7m");      /* 反転（背景色と前景色の入れ替え） */
+                printf("\x1b[4m");      /* 反転（背景色と前景色の入れ替え） */
         }
-        std::cout << "   " << i+1 << "  " << data << std::endl;
-        printf("\x1b[0m");      /* デフォルトに戻す */
+        std::cout << "   " << i+1 << "  " << std::flush;
+        if (cY == i) {
+            // カーソルより前の文字たち
+            for (int i=0;i<cX;i++) {
+                std::cout << data[i] << std::flush;
+            }
+            // カーソル
+            if (data[cX] == 0)
+                printf("\x1b[7m ");      /* 反転（背景色と前景色の入れ替え） */
+            else
+                printf("\x1b[7m%c", data[cX]);      /* 反転（背景色と前景色の入れ替え） */
+            printf("\x1b[0m");      /* デフォルトに戻す */
+
+            // カーソルより後の文字たち
+            for (int i=cX+1;i<data.length()+1;i++) {
+                std::cout << data[i] << std::flush;
+            }
+            std::cout << std::endl;
+        }
+        else {
+            std::cout << data << std::endl;
+        }
         i++;
         if (i>h) {
             break;
