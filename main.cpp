@@ -42,9 +42,19 @@ void MainWindow::Main(void) {
                         break;
                     }
             case 1: {
-                        fileData.resize(size(fileData)+1);
-                        cY++;
-                        cX = 0;
+                        if (cX == fileData[cY].length()) {
+                            fileData.resize(size(fileData)+1);
+                            for (int i=cY+1;i<size(fileData);i++) {
+                                fileData[i] = fileData[i+1];
+                            }
+                            cY++;
+                        }
+                        else {
+                            fileData.resize(size(fileData)+1);
+                            cY++;
+                            bestLine++;
+                            cX = 0;
+                        }
                         break;
                     }
         }
@@ -53,9 +63,22 @@ void MainWindow::Main(void) {
     else if (inputData == 127) {
         if (cX > 0) {
             if (mode==1) {
-                fileData[cY][cX-1] = ' ';
+                fileData[cY].resize(fileData[cY].length()-1);
+                for (int s=cX-1;s<fileData[cY].length();s++) {
+                    fileData[cY][s] = fileData[cY][s+1];
+                }
+                bestLine--;
             }
             cX--;
+        }
+        else if (cX == 0){
+            for (int i=cY;i<size(fileData);i++) {
+                fileData[i] = fileData[i+1];
+            }
+            fileData.resize(size(fileData)-1);
+            cY--;
+            cX = fileData[cY].length();
+            editWindow->drawOutCommand = "OK";
         }
     }
     else if (inputData == 27) {
@@ -83,12 +106,14 @@ void MainWindow::Main(void) {
                                       }
                             // j
                             case 106: {
-                                          if (cY < lineNum) cY++;
+                                          if (bestLine > cY) cY++;
+                                          cX = fileData[cY].length();
                                           break;
                                       }
                             // k
                             case 107: {
                                           if (cY > 0) cY--;
+                                          cX = fileData[cY].length();
                                           break;
                                       }
                             // l
@@ -109,8 +134,9 @@ void MainWindow::Main(void) {
                     }
             // insert
             case 1: {
-                        fileData[cY].resize(cX);
-                        fileData[cY].push_back(inputData);
+                        std::string addStr(1, inputData);
+                        //fileData[cY].resize(fileData[cY].length()+1);
+                        fileData[cY].insert(cX, addStr);
                         cX++;
                         break;
                     }
@@ -123,6 +149,7 @@ void MainWindow::Main(void) {
 int main(int argc, char*argv[]) {
     MainWindow mw;
     MainWindow *mainWindow = &mw;
+
 
     if (argc > 1) {
         std::string line;
@@ -143,11 +170,12 @@ int main(int argc, char*argv[]) {
                 fileData.push_back("\n");
             }
             lineNum--;
-            cY = 0;
+            cY = 1;
             cX = 0;
             input_file.close();
         }
     }
+    bestLine = size(fileData)-1;
 
     cY = 1;
     cX = 0;

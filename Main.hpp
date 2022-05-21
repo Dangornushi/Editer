@@ -70,5 +70,6 @@ inline int mode;
 inline int cX;
 inline int cY;
 inline std::string openFileName;
+inline int bestLine;
 
 #endif
