@@ -1,7 +1,7 @@
-.o
-.DS_STORE
-.dSYN
-.swp
+*.o
+*.DS_STORE
+*.dSYN
+*.swp
 
 
 
