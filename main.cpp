@@ -3,6 +3,7 @@
 void MainWindow::MainInit(void) {
 
     system("clear");
+    printf("\e[?25l");
 
     backC = 236;
     cursC = 7;
@@ -11,6 +12,8 @@ void MainWindow::MainInit(void) {
     nomalC = 34;
     loopC = 123;
     symbolbracketC = 228;
+    reservC = 75;
+    typeC = 46;
 
     MainWindow::Main();
 }
@@ -80,6 +83,8 @@ void MainWindow::Main(void) {
                             if (bestLine == cY) {
                                 // 一番下のラインを追加hした場合
                                 editWindow->drawOutCommand = "Add New Line!";
+                                // ファイル容量を一つ増やす
+                                fileData.resize(bestLine+1);
                             }
 
                             else {
@@ -97,16 +102,20 @@ void MainWindow::Main(void) {
                                 }
                             }
                         }
-
                         cX = 0; // カーソルを先頭に持ってくる
+
                         break;
                     }
+            default:
+                    break;
         }
     }
     // Backspace
     else if (inputData == 127) {
         if (cX > 0) {
+            if (mode==0) {}
             if (mode==1) {
+                fileData[cY][cX] = ' ';
                 fileData[cY].resize(fileData[cY].length()-1);
                 for (int s=cX-1;s<fileData[cY].length();s++) {
                     fileData[cY][s] = fileData[cY][s+1];
@@ -116,7 +125,6 @@ void MainWindow::Main(void) {
         }
         else if (cX == 0){
             // 行をひとつ削除する場合
-
 
             fileData[cY-1] += fileData[cY];
             editWindow->drawOutCommand = fileData[cY-1];
@@ -172,14 +180,14 @@ void MainWindow::Main(void) {
                                       }
                             // k
                             case 107: {
-                                          if (cY > 0) {
+                                          if (cY >= 1) {
                                               cY--;
                                               if (fileDataC > 0 && editWindow->h>cY) {
                                                   fileDataC--;
                                                   lineNum--;
                                               }
+                                              cX = fileData[cY].length();
                                           }
-                                          cX = fileData[cY].length();
                                           break;
                                       }
                             // l
@@ -201,7 +209,7 @@ void MainWindow::Main(void) {
             // insert
             case 1: {
                         std::string addStr(1, inputData);
-                        //fileData[cY].resize(fileData[cY].length()+1);
+                       // fileData[cY].resize(fileData[cY].length()+1);
                         fileData[cY].insert(cX, addStr);
                         cX++;
                         break;

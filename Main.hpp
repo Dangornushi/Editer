@@ -35,7 +35,7 @@ class EditWindow {
         void drawCommandLine();
         void drawOutCommandLine();
         void drawWindow();
-        void colorScheme();
+        void colorScheme(std::string fileStrS, int num);
 };
 
 class Io {
@@ -74,7 +74,6 @@ inline int cY;
 inline std::string openFileName;
 inline int bestLine;
 inline int fileDataC;
-inline std::string fileChar;
 
 inline int backC;
 inline int cursC;
@@ -85,5 +84,8 @@ inline int numC;
 inline int charC;
 inline int loopC;
 inline int symbolbracketC;
+inline int reservC;
+
+inline int FC;
 
 #endif

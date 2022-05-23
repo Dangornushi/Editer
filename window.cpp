@@ -1,6 +1,7 @@
 #include "Main.hpp"
 
 std::string tmp1, tmp2, tmp3,tmp4, tmp5;
+int F = 0;
 
 int digit(int n) {
     int c = 0;
@@ -13,12 +14,13 @@ int digit(int n) {
 
 }
 
-void EditWindow::colorScheme() {
+void EditWindow::colorScheme(std::string fileStrS, int num) {
     std::smatch m;
-    if (std::isdigit(fileChar[0]))
+    char fileChar = fileStrS[num];
+    if (std::isdigit(fileChar))
         charC = numC;
     else {
-        switch (fileChar[0]) {
+        switch (fileChar) {
             case '(':
             case ')':
             case '{':
@@ -29,17 +31,48 @@ void EditWindow::colorScheme() {
             case '>':
                 charC = symbolbracketC;
                 break;
-            default :
-                charC = textC;
-                break;
+            default : {
+                          if (F > 0) {
+                              charC = FC;
+                              F--;
+                          }
+                          else if (fileStrS.substr(num, num+4) == "for ") {
+                              charC = reservC;
+                              FC = reservC;
+                              F = 3;
+                          }
+                          else if (fileStrS.substr(num, num+6) == "while ") {
+                              charC = reservC;
+                              FC = reservC;
+                              F = 5;
+                          }
+                          else if (fileStrS.substr(num, num+4) == "int ") {
+                              charC = typeC;
+                              FC = typeC;
+                              F = 3;
+                          }
+                          else if (fileStrS.substr(num, num+5) == "char ") {
+                              charC = typeC;
+                              FC = typeC;
+                              F = 4;
+                          }
+                          else if (fileStrS.substr(num, num+7) == "string ") {
+                              charC = typeC;
+                              FC = typeC;
+                              F = 6;
+                          }
+                          else {
+                              charC = textC;
+                          }
+                      }
+                      break;
         }
     }
 }
 
 void EditWindow::drawDataLine() {
-    int empLines = h - (size(fileData));
+    int empLines = h - size(fileData);
     int numS = 0;
-    // = textC;
     std::string data ;
 
     // ファイルの内容
@@ -55,12 +88,12 @@ void EditWindow::drawDataLine() {
             std::cout << " "<< std::flush;
             numS++;
         }
+
         if (cY == i && cX > 0) {
             // カーソルより前の文字たち
-            for (int i=0;i<cX;i++) {
-                fileChar = data[i];
-                colorScheme();
-                printf("\x1b[38;5;%dm%c", charC, data[i]);
+            for (int j=0;j<cX;j++) {
+                colorScheme(data, j);
+                printf("\x1b[38;5;%dm%c", charC, data[j]);
             }
         }
         if (cY==i) {
@@ -73,23 +106,27 @@ void EditWindow::drawDataLine() {
 
             printf("\x1b[48;5;%dm\x1b[38;5;%dm", backC, textC); /* デフォルトに戻す */
 
-            // カーソルより後の文字たち
-            for (int i=cX+1;i<w-numS;i++) {
-                if (i > fileData[cY].length()) std::cout << " " << std::flush;
-                else {
-                    fileChar = data[i];
-                    colorScheme();
-                    printf("\x1b[38;5;%dm%c", charC, data[i]);
+//            if (fileData[i].length() > 1) {
+                // カーソルより後の文字たち
+                for (int j=cX+1;j<w-numS;j++) {
+                    if (j > fileData[cY].length()) std::cout << " " << std::flush;
+                    else {
+                        colorScheme(data, j);
+                        printf("\x1b[38;5;%dm%c", charC, data[j]);
+                    }
                 }
-            }
+ //           }
+  //          else {
+//                for (int j=numS;j<w-1;j++)
+//                    std::cout << " " << std::flush;
+//            }
 
             printf("\x1b[48;5;%dm\x1b[38;5;%dm", backC, textC); /* デフォルトに戻す */
             std::cout << std::endl;
         }
         else {
             for (int c=0;c<data.length();c++) {
-                    fileChar = data[c];
-                    colorScheme();
+                colorScheme(data, c);
                 printf("\x1b[38;5;%dm%c", charC, data[c]);
             }
             for (int c=data.length();c<w-numS;c++) {
@@ -104,9 +141,9 @@ void EditWindow::drawDataLine() {
     }
     // 下の余白
     for (int i=0;i<empLines+1;i++) {
-        std::cout << "-" << std::flush;
-        for (int j=1;j<w/3;j++) {
-            std::cout << "   " << std::flush;
+        std::cout << "- " << std::flush;
+        for (int j=1;j<w/2;j++) {
+            std::cout << "  " << std::flush;
         }
         std::cout << std::endl;
     }

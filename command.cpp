@@ -4,6 +4,7 @@ std::string Command::runCommand(void) {
     std::string line = "";
     if (inputCommand == "q") {
         system("clear");
+        printf("\e[?25h");
         std::exit(0);
     }
     if (inputCommand == "w") {
