@@ -1,10 +1,16 @@
 #include "Main.hpp"
 
-std::string lineData;
-
 void MainWindow::MainInit(void) {
 
     system("clear");
+
+    backC = 236;
+    cursC = 7;
+    textC = 11;
+    numC = 13;
+    nomalC = 34;
+    loopC = 123;
+    symbolbracketC = 228;
 
     MainWindow::Main();
 }
@@ -20,7 +26,8 @@ void MainWindow::Main(void) {
     else {
         perror("ioctl");
     }
-    editWindow->h-=3;
+
+    editWindow->h-=4;
     editWindow->drawDataLine();
     editWindow->drawCommandLine();
     editWindow->drawOutCommandLine();
@@ -32,7 +39,7 @@ void MainWindow::Main(void) {
         }
     }
 
-    if (inputData == '\n') {
+    if (inputData == 13 || inputData == '\n') {
         switch (mode) {
             case 0: {
                         //cursXを正しい値にする（global変数使う）
@@ -42,19 +49,56 @@ void MainWindow::Main(void) {
                         break;
                     }
             case 1: {
-                        if (cX == fileData[cY].length()) {
-                            fileData.resize(size(fileData)+1);
-                            for (int i=cY+1;i<size(fileData);i++) {
-                                fileData[i] = fileData[i+1];
-                            }
+                        bestLine++; // ラインの最大値を上げる
+                        if (cX < fileData[cY].length()) {
+                            // 行の途中で改行された場合
+                            std::string str1 = fileData[cY].substr(cX);
+                            fileData[cY].erase(cX, fileData[cY].length()-cX);
                             cY++;
+                            // ファイル容量を一つ増やす
+                            fileData.resize(bestLine+1);
+                            fileData[cY] = str1;
+                            cY++;
+
+                            std::string tmp = "";
+                            std::string tmp2 = "";
+
+                            // ファイル容量を一つ増やす
+                            fileData.resize(bestLine+1);
+
+                            for (int i=cY;i<size(fileData);i++) { // ファイルの終了まで
+                                tmp = fileData[i]; // 今の行のデータ
+                                fileData[i] = tmp2; // 初回は空、二回目以降前の行のデータが格納される
+                                tmp2 = tmp; // 初回は空、二回目からデータありを実現するカラクリ
+                            }
+
+                            cX = str1.length();
                         }
                         else {
-                            fileData.resize(size(fileData)+1);
-                            cY++;
-                            bestLine++;
-                            cX = 0;
+                            cY++; // カーソルを一つ下げる
+                            // 行で最後の文字のところで改行された場合
+                            if (bestLine == cY) {
+                                // 一番下のラインを追加hした場合
+                                editWindow->drawOutCommand = "Add New Line!";
+                            }
+
+                            else {
+                                // カーソルを途中追加した場合
+                                std::string tmp = "";
+                                std::string tmp2 = "";
+
+                                // ファイル容量を一つ増やす
+                                fileData.resize(bestLine+1);
+
+                                for (int i=cY;i<size(fileData);i++) { // ファイルの終了まで
+                                    tmp = fileData[i]; // 今の行のデータ
+                                    fileData[i] = tmp2; // 初回は空、二回目以降前の行のデータが格納される
+                                    tmp2 = tmp; // 初回は空、二回目からデータありを実現するカラクリ
+                                }
+                            }
                         }
+
+                        cX = 0; // カーソルを先頭に持ってくる
                         break;
                     }
         }
@@ -67,18 +111,28 @@ void MainWindow::Main(void) {
                 for (int s=cX-1;s<fileData[cY].length();s++) {
                     fileData[cY][s] = fileData[cY][s+1];
                 }
-                bestLine--;
             }
             cX--;
         }
         else if (cX == 0){
-            for (int i=cY;i<size(fileData);i++) {
+            // 行をひとつ削除する場合
+
+
+            fileData[cY-1] += fileData[cY];
+            editWindow->drawOutCommand = fileData[cY-1];
+
+            cY--;
+            bestLine--;
+            std::string tmp = "";
+            std::string tmp2 = "";
+
+            for (int i=cY+1;i<size(fileData)-1;i++) { // ファイルの終了まで
                 fileData[i] = fileData[i+1];
             }
+
+            // ファイル容量を一つ減らす
             fileData.resize(size(fileData)-1);
-            cY--;
             cX = fileData[cY].length();
-            editWindow->drawOutCommand = "OK";
         }
     }
     else if (inputData == 27) {
@@ -106,13 +160,25 @@ void MainWindow::Main(void) {
                                       }
                             // j
                             case 106: {
-                                          if (bestLine > cY) cY++;
+                                          if (bestLine > cY) {
+                                              cY++;
+                                              if (editWindow->h<cY) {
+                                                  fileDataC++;
+                                                  lineNum++;
+                                              }
+                                          }
                                           cX = fileData[cY].length();
                                           break;
                                       }
                             // k
                             case 107: {
-                                          if (cY > 0) cY--;
+                                          if (cY > 0) {
+                                              cY--;
+                                              if (fileDataC > 0 && editWindow->h>cY) {
+                                                  fileDataC--;
+                                                  lineNum--;
+                                              }
+                                          }
                                           cX = fileData[cY].length();
                                           break;
                                       }
@@ -142,6 +208,7 @@ void MainWindow::Main(void) {
                     }
         }
     }
+    /* 画面をクリア */
     system("clear");
     Main();
 }
@@ -149,7 +216,6 @@ void MainWindow::Main(void) {
 int main(int argc, char*argv[]) {
     MainWindow mw;
     MainWindow *mainWindow = &mw;
-
 
     if (argc > 1) {
         std::string line;
@@ -179,8 +245,16 @@ int main(int argc, char*argv[]) {
 
     cY = 1;
     cX = 0;
+    fileDataC = 0;
 
     mainWindow->MainInit();
 
     return 0;
 }
+
+
+
+
+
+
+

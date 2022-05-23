@@ -18,6 +18,7 @@
 #include <thread>
 #include <fstream>
 #include <stdio.h>
+#include <regex>
 
 class EditWindow {
     std::vector<std::string> putStrings;
@@ -34,6 +35,7 @@ class EditWindow {
         void drawCommandLine();
         void drawOutCommandLine();
         void drawWindow();
+        void colorScheme();
 };
 
 class Io {
@@ -71,5 +73,17 @@ inline int cX;
 inline int cY;
 inline std::string openFileName;
 inline int bestLine;
+inline int fileDataC;
+inline std::string fileChar;
+
+inline int backC;
+inline int cursC;
+inline int typeC;
+inline int textC;
+inline int nomalC;
+inline int numC;
+inline int charC;
+inline int loopC;
+inline int symbolbracketC;
 
 #endif
