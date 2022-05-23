@@ -14,6 +14,10 @@ void MainWindow::MainInit(void) {
     symbolbracketC = 228;
     reservC = 75;
     typeC = 46;
+    strC = 26;
+    ifC = 30;
+
+    fileDataC = 0;
 
     MainWindow::Main();
 }
@@ -24,22 +28,20 @@ void MainWindow::Main(void) {
 
     if (~ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws)) {
         editWindow->w = ws.ws_col;
-        editWindow->h = ws.ws_row ;
+        editWindow->h = ws.ws_row;
     }
     else {
         perror("ioctl");
     }
 
-    editWindow->h-=4;
+    editWindow->h-=5;
     editWindow->drawDataLine();
     editWindow->drawCommandLine();
     editWindow->drawOutCommandLine();
 
     while (1) {
-        if (kbhit()) {
-            inputData = getch();
-            break;
-        }
+        inputData = getch();
+        break;
     }
 
     if (inputData == 13 || inputData == '\n') {
@@ -47,8 +49,8 @@ void MainWindow::Main(void) {
             case 0: {
                         //cursXを正しい値にする（global変数使う）
                         editWindow->drawOutCommand = command->runCommand();
-                        command->inputCommand.resize(0);//内部データ
-                        editWindow->drawCommand.resize(0);//表示用
+                        command->inputCommand = "";//内部データ
+                        editWindow->drawCommand = "";//表示用
                         break;
                     }
             case 1: {
@@ -174,15 +176,15 @@ void MainWindow::Main(void) {
                                                   fileDataC++;
                                                   lineNum++;
                                               }
+                                              cX = fileData[cY].length();
                                           }
-                                          cX = fileData[cY].length();
                                           break;
                                       }
                             // k
                             case 107: {
-                                          if (cY >= 1) {
+                                          if (cY > 0) {
                                               cY--;
-                                              if (fileDataC > 0 && editWindow->h>cY) {
+                                              if (fileDataC>cY) {
                                                   fileDataC--;
                                                   lineNum--;
                                               }
@@ -209,7 +211,6 @@ void MainWindow::Main(void) {
             // insert
             case 1: {
                         std::string addStr(1, inputData);
-                       // fileData[cY].resize(fileData[cY].length()+1);
                         fileData[cY].insert(cX, addStr);
                         cX++;
                         break;
@@ -217,7 +218,10 @@ void MainWindow::Main(void) {
         }
     }
     /* 画面をクリア */
-    system("clear");
+
+    //printf("\033[1J");
+    printf("\033[2J");
+    //system("clear");
     Main();
 }
 
@@ -259,10 +263,4 @@ int main(int argc, char*argv[]) {
 
     return 0;
 }
-
-
-
-
-
-
 

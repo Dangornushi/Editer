@@ -85,6 +85,8 @@ inline int charC;
 inline int loopC;
 inline int symbolbracketC;
 inline int reservC;
+inline int strC;
+inline int ifC;
 
 inline int FC;
 
