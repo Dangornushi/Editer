@@ -129,7 +129,7 @@ void EditWindow::drawDataLine() {
             if (data[cX] == 0)
                 printf("\x1b[48;5;%dm ",cursC);      /* 反転（背景色と前景色の入れ替え*/
             else
-                printf("\x1b[48;5;%dm%c",cursC,  fileData[i][cX]);      /* 反転（背景色と前景色の入れ替え） */
+                printf("\x1b[48;5;%dm%c",cursC,  data[cX]);      /* 反転（背景色と前景色の入れ替え） */
 
             printf("\x1b[48;5;%dm\x1b[38;5;%dm", backC, textC); /* デフォルトに戻す */
 
@@ -173,10 +173,9 @@ void EditWindow::drawDataLine() {
 
 void EditWindow::drawCommandLine() {
     if (mode==0) {
-        std::cout << "\x1b[48;5;" << nomalC << "m" <<  "== Nomel ==" << std::endl;
-        printf("\x1b[48;5;%dm\x1b[38;5;%dm", backC, textC); /* デフォルトに戻す */
+        std::cout << "\x1b[48;5;" << nomalC << "m" <<  "== Nomel ==" << "\x1b[48;5;" << backC << "m" << std::endl;
     }
-    std::cout << "\033[31m" << drawCommand << "\033[m" << std::endl;
+    std::cout << "\033[31m:" << drawCommand << "\033[m" << std::endl;
 }
 
 void EditWindow::drawOutCommandLine() {

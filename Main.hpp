@@ -60,6 +60,7 @@ class MainWindow {
         std::string openFileName;
         void MainInit();
         void Main();
+        void clear();
 };
 
 int getche(void);

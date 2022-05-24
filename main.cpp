@@ -1,5 +1,10 @@
 #include "Main.hpp"
 
+void MainWindow::clear() {
+    for (int i=0;i<editWindow->h;i++)
+        printf("");
+}
+
 void MainWindow::MainInit(void) {
 
     system("clear");
@@ -18,6 +23,7 @@ void MainWindow::MainInit(void) {
     ifC = 30;
 
     fileDataC = 0;
+    command->inputCommand = "";
 
     MainWindow::Main();
 }
@@ -39,10 +45,10 @@ void MainWindow::Main(void) {
     editWindow->drawCommandLine();
     editWindow->drawOutCommandLine();
 
-    while (1) {
+     //while (1) {
         inputData = getch();
-        break;
-    }
+        //break;
+    //}
 
     if (inputData == 13 || inputData == '\n') {
         switch (mode) {
@@ -78,8 +84,7 @@ void MainWindow::Main(void) {
                             }
 
                             cX = str1.length();
-                        }
-                        else {
+                        } else {
                             cY++; // カーソルを一つ下げる
                             // 行で最後の文字のところで改行された場合
                             if (bestLine == cY) {
@@ -106,6 +111,14 @@ void MainWindow::Main(void) {
                         }
                         cX = 0; // カーソルを先頭に持ってくる
 
+                        break;
+                    }
+            case 2: {
+                        // ファイル容量を一つ増やす
+                        editWindow->drawOutCommand = command->runCommand();
+                        command->inputCommand = "";//内部データ
+                        editWindow->drawCommand = "";//表示用
+                        cX = 0;
                         break;
                     }
             default:
@@ -199,10 +212,13 @@ void MainWindow::Main(void) {
                                           }
                                           break;
                                       }
+                             // ESC
+                            case 58: {
+                                         mode = 2;
+                                         cX = 0;
+                                         break;
+                                     }
                             default: {
-                                         editWindow->drawCommand += inputData;
-                                         command->inputCommand += inputData;
-                                         cX++;
                                          break;
                                      }
                         }
@@ -215,12 +231,30 @@ void MainWindow::Main(void) {
                         cX++;
                         break;
                     }
+            // prompt
+            case 2: {
+                        if (inputData == 58) {
+                            mode = 0;
+                        }
+                        else {
+                            std::string addStr(1, inputData);
+                            editWindow->drawCommand.insert(cX, addStr);
+                            command->inputCommand.insert(cX, addStr);
+                            cX++;
+                        }
+                        break;
+                    }
+            default: {
+                         break;
+                     }
         }
     }
+
     /* 画面をクリア */
 
     //printf("\033[1J");
-    printf("\033[2J");
+    clear();
+    //printf("\033[2J");
     //system("clear");
     Main();
 }
