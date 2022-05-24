@@ -19,6 +19,7 @@ std::string Command::runCommand(void) {
     }
     if (inputCommand[0] == 'o') {
         lineNum = 0;
+        fileData = {};
         inputCommand.erase(0, 2);
         openFileName = inputCommand;
         std::ifstream input_file(openFileName, std::ios::in);
@@ -30,6 +31,7 @@ std::string Command::runCommand(void) {
             while (getline(input_file, line)) {
                 fileData.push_back(line);
                 lineNum++;
+                bestLine++;
             }
             if (lineNum == 0) {
                 lineNum++;
@@ -39,6 +41,7 @@ std::string Command::runCommand(void) {
             cY = 0;
             cX = fileData[cY].length();
             input_file.close();
+            fileDataC = 0;
         }
 
     }

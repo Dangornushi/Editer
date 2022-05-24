@@ -3,6 +3,8 @@
 #ifndef Main_H
 #define Main_H
 
+#define TIME_TO_SLEEP 100
+
 
 // include
 #include <termios.h>
@@ -81,6 +83,7 @@ inline int cursC;
 inline int typeC;
 inline int textC;
 inline int nomalC;
+inline int commandC;
 inline int numC;
 inline int charC;
 inline int loopC;

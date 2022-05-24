@@ -20,6 +20,7 @@ void EditWindow::colorScheme(std::string fileStrS, int num) {
     char fileChar = fileStrS[num];
     if (std::isdigit(fileChar))
         charC = numC;
+    if (fileChar == ' ');
     else {
         switch (fileChar) {
             case '(':
@@ -39,29 +40,30 @@ void EditWindow::colorScheme(std::string fileStrS, int num) {
                               inComment = 1;
                               break;
                           }
-                          if (inComment == 1) {
+                          else if (inComment == 1) {
                               inComment = 0;
                           }
+                          break;
                       }
 
             default : {
-                          if (F > 0) {
+                          if (F > 1) {
                               charC = FC;
                               F--;
                           }
-                          else if (fileStrS.substr(num, num+4) == "for ") {
-                              charC = reservC;
-                              FC = reservC;
-                              F = 3;
-                          }
-                          else if (fileStrS.substr(num, num+6) == "while ") {
-                              charC = reservC;
-                              FC = reservC;
-                              F = 5;
+                          else if (fileStrS.substr(num, num+3) == "if ") {
+                              charC = ifC;
+                              FC = ifC;
+                              F = 2;
                           }
                           else if (fileStrS.substr(num, num+4) == "int ") {
                               charC = typeC;
                               FC = typeC;
+                              F = 3;
+                          }
+                          else if (fileStrS.substr(num, num+4) == "for ") {
+                              charC = reservC;
+                              FC = reservC;
                               F = 3;
                           }
                           else if (fileStrS.substr(num, num+5) == "char ") {
@@ -74,6 +76,18 @@ void EditWindow::colorScheme(std::string fileStrS, int num) {
                               FC = typeC;
                               F = 4;
                           }
+                          else if (fileStrS.substr(num, num+5) == "else " ||
+                                  fileStrS.substr(num, num+5) == "case " ||
+                                  fileStrS.substr(num, num+5) == "elif ") {
+                              charC = ifC;
+                              FC = ifC;
+                              F = 4;
+                          }
+                          else if (fileStrS.substr(num, num+6) == "while ") {
+                              charC = reservC;
+                              FC = reservC;
+                              F = 5;
+                          }
                           else if (fileStrS.substr(num, num+7) == "string ") {
                               charC = typeC;
                               FC = typeC;
@@ -82,29 +96,26 @@ void EditWindow::colorScheme(std::string fileStrS, int num) {
                           else if (fileStrS.substr(num, num+8) == "#include ") {
                               charC = typeC;
                               FC = typeC;
-                              F = 7;
-                          }
-                          else if (fileStrS.substr(num, num+3) == "if ") {
-                              charC = ifC;
-                              FC = ifC;
-                              F = 2;
+                              F = 8;
                           }
                           else {
                               charC = textC;
+                              F = 0;
                           }
                       }
-                      break;
         }
     }
 }
 
 void EditWindow::drawDataLine() {
-    int empLines = h - size(fileData);
+    int empLines = h - bestLine;
     int numS = 0;
     std::string data ;
 
+//    std::cout << std::endl;
+
     // ファイルの内容
-    for (int i=fileDataC;i<size(fileData);i++) {
+    for (int i=fileDataC;i<bestLine;i++) {
         data = fileData[i];
         if (cY == i) {
             printf("\x1b[48;5;%dm",backC+1); // 下線
@@ -174,6 +185,9 @@ void EditWindow::drawDataLine() {
 void EditWindow::drawCommandLine() {
     if (mode==0) {
         std::cout << "\x1b[48;5;" << nomalC << "m" <<  "== Nomel ==" << "\x1b[48;5;" << backC << "m" << std::endl;
+    }
+    if (mode==2) {
+        std::cout << "\x1b[48;5;" << commandC << "m" <<  "==Command==" << "\x1b[48;5;" << backC << "m" << std::endl;
     }
     std::cout << "\033[31m:" << drawCommand << "\033[m" << std::endl;
 }

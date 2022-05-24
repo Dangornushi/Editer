@@ -7,12 +7,13 @@ void MainWindow::clear() {
 
 void MainWindow::MainInit(void) {
 
-    system("clear");
-    printf("\e[?25l");
+    //system("clear");
+    //printf("\e[?25l");
+    clear();
 
     backC = 236;
     cursC = 7;
-    textC = 11;
+    textC = 188;
     numC = 13;
     nomalC = 34;
     loopC = 123;
@@ -20,7 +21,8 @@ void MainWindow::MainInit(void) {
     reservC = 75;
     typeC = 46;
     strC = 26;
-    ifC = 30;
+    ifC = 160;
+    commandC = 129;
 
     fileDataC = 0;
     command->inputCommand = "";
@@ -40,7 +42,7 @@ void MainWindow::Main(void) {
         perror("ioctl");
     }
 
-    editWindow->h-=5;
+//    editWindow->h-=4;
     editWindow->drawDataLine();
     editWindow->drawCommandLine();
     editWindow->drawOutCommandLine();
@@ -130,7 +132,7 @@ void MainWindow::Main(void) {
         if (cX > 0) {
             if (mode==0) {}
             if (mode==1) {
-                fileData[cY][cX] = ' ';
+                fileData[cY][cX-1] = ' ';
                 fileData[cY].resize(fileData[cY].length()-1);
                 for (int s=cX-1;s<fileData[cY].length();s++) {
                     fileData[cY][s] = fileData[cY][s+1];
@@ -226,13 +228,23 @@ void MainWindow::Main(void) {
                     }
             // insert
             case 1: {
-                        std::string addStr(1, inputData);
-                        fileData[cY].insert(cX, addStr);
-                        cX++;
+                        if (inputData == 9) {
+                            for (int i=4;i>0;i--) {
+                                std::string addStr(1, ' ');
+                                fileData[cY].insert(cX, addStr);
+                                cX++;
+                            }
+                        }
+                        else {
+                            std::string addStr(1, inputData);
+                            fileData[cY].insert(cX, addStr);
+                            cX++;
+                        }
                         break;
                     }
             // prompt
             case 2: {
+                        // ESC
                         if (inputData == 58) {
                             mode = 0;
                         }
@@ -241,6 +253,7 @@ void MainWindow::Main(void) {
                             editWindow->drawCommand.insert(cX, addStr);
                             command->inputCommand.insert(cX, addStr);
                             cX++;
+                            std::this_thread::sleep_for(std::chrono::milliseconds(TIME_TO_SLEEP));
                         }
                         break;
                     }
@@ -250,26 +263,33 @@ void MainWindow::Main(void) {
         }
     }
 
-    /* 画面をクリア */
+    /*claer window */
 
-    //printf("\033[1J");
+    /*
+     * if it has bug:
+     * printf("\033[2J");
+     * printf("\033[1J");
+     * system("clear");
+    */
+
     clear();
-    //printf("\033[2J");
-    //system("clear");
     Main();
 }
 
 int main(int argc, char*argv[]) {
+    /* Main class */
     MainWindow mw;
     MainWindow *mainWindow = &mw;
 
-    if (argc > 1) {
+    /*  */
+
+    if ( argc > 1) {
         std::string line;
         lineNum = 0;
         openFileName = argv[1];
         std::ifstream input_file(openFileName, std::ios::in);
         if (!input_file) {
-            std::cout << "Could not open the file -> '" << openFileName <<  "'" << std::endl;
+            std::cout << "Could not open the file : '" << openFileName <<  "'" << std::endl;
             return 0;
         }
         else {
@@ -287,8 +307,33 @@ int main(int argc, char*argv[]) {
             input_file.close();
         }
     }
+    else {
+        mode = 2;
+        fileData = {
+            "_____________________________",
+            "|                           |",
+            "|                           |",
+            "|          _________________|",
+            "|          |",
+            "|          |",
+            "|          |________________",
+            "|                          |",
+            "|                          |",
+            "|           _______________|",
+            "|          |",
+            "|          |",
+            "|          |________________",
+            "|                          |",
+            "|                          |",
+            "|__________________________|",
+        };
+        cY = 1;
+        cX = 0;
+            fileDataC = 0;
+    }
     bestLine = size(fileData)-1;
 
+    /* cursol */
     cY = 1;
     cX = 0;
     fileDataC = 0;
