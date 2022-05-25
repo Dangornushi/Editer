@@ -77,6 +77,7 @@ inline int cY;
 inline std::string openFileName;
 inline int bestLine;
 inline int fileDataC;
+inline int newC;
 
 inline int backC;
 inline int cursC;

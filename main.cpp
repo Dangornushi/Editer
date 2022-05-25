@@ -36,21 +36,17 @@ void MainWindow::Main(void) {
 
     if (~ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws)) {
         editWindow->w = ws.ws_col;
-        editWindow->h = ws.ws_row;
+        editWindow->h = ws.ws_row-3; // コマンド列分マイナス
     }
     else {
         perror("ioctl");
     }
 
-//    editWindow->h-=4;
     editWindow->drawDataLine();
     editWindow->drawCommandLine();
     editWindow->drawOutCommandLine();
 
-     //while (1) {
-        inputData = getch();
-        //break;
-    //}
+    inputData = getch();
 
     if (inputData == 13 || inputData == '\n') {
         switch (mode) {
@@ -121,6 +117,8 @@ void MainWindow::Main(void) {
                         command->inputCommand = "";//内部データ
                         editWindow->drawCommand = "";//表示用
                         cX = 0;
+                        mode = 0;
+
                         break;
                     }
             default:
@@ -171,10 +169,8 @@ void MainWindow::Main(void) {
                         switch (inputData) {
                             // h
                             case 104: {
-                                          if (cX > 0) cX--;
-                                          else {
-                                              cY--;
-                                              cX = fileData[cY].length();
+                                          if (cX > 0) {
+                                              cX--;
                                           }
                                           break;
                                       }
@@ -185,33 +181,39 @@ void MainWindow::Main(void) {
                                       }
                             // j
                             case 106: {
-                                          if (bestLine > cY) {
-                                              cY++;
-                                              if (editWindow->h<cY) {
+                                          // ファイル下限
+                                          if (size(fileData) > cY) {
+                                              if (editWindow->h+fileDataC == cY ) {
                                                   fileDataC++;
-                                                  lineNum++;
+                                                  bestLine++;
+                                                  newC++;
                                               }
-                                              cX = fileData[cY].length();
+                                              else cY++;
+                                              if (cX > fileData[cY].length())
+                                                  cX = fileData[cY].length();
                                           }
                                           break;
                                       }
                             // k
                             case 107: {
+                                          // ファイル上限
                                           if (cY > 0) {
-                                              cY--;
-                                              if (fileDataC>cY) {
+                                              if (fileDataC == cY) {
+                                                  newC--;
                                                   fileDataC--;
-                                                  lineNum--;
+                                                  bestLine--;
+                                                  newC--;
                                               }
-                                              cX = fileData[cY].length();
+                                              else cY--;
+                                              if (cX > fileData[cY].length())
+                                                  cX = fileData[cY].length();
                                           }
                                           break;
                                       }
-                            // l
+                                      // l
                             case 108: {
-                                          if (cX < fileData[cY].length()) {
+                                          if (cX < fileData[cY].length())
                                               cX++;
-                                          }
                                           break;
                                       }
                              // ESC
@@ -220,9 +222,8 @@ void MainWindow::Main(void) {
                                          cX = 0;
                                          break;
                                      }
-                            default: {
-                                         break;
-                                     }
+                            default:
+                                     break;
                         }
                         break;
                     }
@@ -244,22 +245,15 @@ void MainWindow::Main(void) {
                     }
             // prompt
             case 2: {
-                        // ESC
-                        if (inputData == 58) {
-                            mode = 0;
-                        }
-                        else {
-                            std::string addStr(1, inputData);
-                            editWindow->drawCommand.insert(cX, addStr);
-                            command->inputCommand.insert(cX, addStr);
-                            cX++;
-                            std::this_thread::sleep_for(std::chrono::milliseconds(TIME_TO_SLEEP));
-                        }
+                        std::string addStr(1, inputData);
+                        editWindow->drawCommand.insert(cX, addStr);
+                        command->inputCommand.insert(cX, addStr);
+                        cX++;
+                        std::this_thread::sleep_for(std::chrono::milliseconds(TIME_TO_SLEEP));
                         break;
                     }
-            default: {
-                         break;
-                     }
+            default:
+                    break;
         }
     }
 
@@ -280,8 +274,6 @@ int main(int argc, char*argv[]) {
     /* Main class */
     MainWindow mw;
     MainWindow *mainWindow = &mw;
-
-    /*  */
 
     if ( argc > 1) {
         std::string line;
@@ -337,9 +329,12 @@ int main(int argc, char*argv[]) {
     cY = 1;
     cX = 0;
     fileDataC = 0;
+    newC = 0;
 
     mainWindow->MainInit();
 
     return 0;
 }
 
+/*
+ */
